@@ -21,15 +21,9 @@
 file(DOWNLOAD "https://download.sourceforge.net/libpng/libpng-1.6.34.tar.xz"
     "${CMAKE_BINARY_DIR}/libpng-1.6.34.tar.xz"
     EXPECTED_HASH MD5=c05b6ca7190a5e387b78657dbe5536b2
-    STATUS libpng_STATUS SHOW_PROGRESS
+    SHOW_PROGRESS
     )
-check_download(libpng libpng-1.6.34.tar.xz)
-
-add_custom_target(libpng-preinst
-    COMMAND ${CMAKE_COMMAND} -E tar xJf libpng-1.6.34.tar.xz
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-    COMMENT "Unpacking libpng"
-    )
+unpack_txz(libpng-1.6.34.tar.xz libpng-1.6.34)
 
 if(BUILD_STATIC_LIBS)
     set(LIBPNG_CMAKE_ARGS -DPNG_STATIC=ON -DPNG_SHARED=OFF)
@@ -52,7 +46,7 @@ add_custom_target(libpng-debug
     COMMAND ${CMAKE_COMMAND} --build libpng-debug --config Debug --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     COMMENT "Building libpng-debug"
-    DEPENDS libpng-preinst zlib
+    DEPENDS zlib
     )
 
 add_custom_target(libpng-release
@@ -63,11 +57,11 @@ add_custom_target(libpng-release
     COMMAND ${CMAKE_COMMAND} --build libpng-release --config Release --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     COMMENT "Building libpng-release"
-    DEPENDS libpng-preinst zlib
+    DEPENDS zlib
     )
 
 if(BUILD_STATIC_LIBS)
-    add_custom_target(libpng-postinst
+    add_custom_target(libpng
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/share"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/lib/libpng"
@@ -80,7 +74,7 @@ if(BUILD_STATIC_LIBS)
         DEPENDS libpng-debug libpng-release
         )
 else()
-    add_custom_target(libpng-postinst
+    add_custom_target(libpng
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/share"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/lib/libpng"
@@ -89,5 +83,3 @@ else()
         DEPENDS libpng-debug libpng-release
         )
 endif()
-
-add_custom_target(libpng ALL DEPENDS libpng-postinst)

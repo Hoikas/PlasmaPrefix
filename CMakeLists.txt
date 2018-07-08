@@ -18,7 +18,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.2)
 project(PlasmaPrefix NONE)
 
 option(BUILD_STATIC_LIBS "Build static libraries instead of DLLs" ON)
@@ -45,13 +45,35 @@ else()
     message(FATAL_ERROR "Unsupported or unknown BUILD_ARCH ${BUILD_ARCH}")
 endif()
 
-function(check_download pkgname tarball)
-    list(GET ${pkgname}_STATUS 0 RESULT)
-    list(GET ${pkgname}_STATUS 1 MESSAGE)
-    if(NOT RESULT EQUAL 0)
-        message(FATAL_ERROR ${MESSAGE})
+function(_unpack_archive tarball tarflags pkgdir)
+    if(NOT EXISTS "${CMAKE_BINARY_DIR}/${pkgdir}")
+        message(STATUS "Unpacking ${tarball}")
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E tar ${tarflags} ${tarball}
+            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+        )
     endif()
 endfunction()
 
+function(unpack_tgz tarball pkgdir)
+    _unpack_archive(${tarball} xzf ${pkgdir})
+endfunction()
+
+function(unpack_txz tarball pkgdir)
+    _unpack_archive(${tarball} xJf ${pkgdir})
+endfunction()
+
+function(unpack_zip tarball pkgdir)
+    # The docs state cmake -E tar can unpack zip files, but doesn't give
+    # any hint on the tar flags to use.  xzf seems to work...
+    _unpack_archive(${tarball} xzf ${pkgdir})
+endfunction()
+
+# Build tools
+include(nasm.cmake)
+include(patch.cmake)
+
+# Packages
 include(zlib.cmake)
 include(libpng.cmake)
+include(libjpeg-turbo.cmake)
