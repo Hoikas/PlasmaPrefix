@@ -69,6 +69,10 @@ if(BUILD_STATIC_LIBS)
     add_custom_target(libjpeg-turbo-postinst
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/share"
+        COMMAND ${CMAKE_COMMAND} -E rename "${INSTALL_DIR}/debug/lib/jpeg-static.lib"
+                    "${INSTALL_DIR}/debug/lib/jpeg.lib"
+        COMMAND ${CMAKE_COMMAND} -E rename "${INSTALL_DIR}/debug/lib/turbojpeg-static.lib"
+                    "${INSTALL_DIR}/debug/lib/turbojpeg.lib"
         COMMAND ${CMAKE_COMMAND} -E rename "${INSTALL_DIR}/lib/jpeg-static.lib"
                     "${INSTALL_DIR}/lib/jpeg.lib"
         COMMAND ${CMAKE_COMMAND} -E rename "${INSTALL_DIR}/lib/turbojpeg-static.lib"
