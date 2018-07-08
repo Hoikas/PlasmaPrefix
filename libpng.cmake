@@ -61,7 +61,7 @@ add_custom_target(libpng-release
     )
 
 if(BUILD_STATIC_LIBS)
-    add_custom_target(libpng
+    add_custom_target(libpng-postinst
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/share"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/lib/libpng"
@@ -74,7 +74,7 @@ if(BUILD_STATIC_LIBS)
         DEPENDS libpng-debug libpng-release
         )
 else()
-    add_custom_target(libpng
+    add_custom_target(libpng-postinst
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/share"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/lib/libpng"
@@ -83,3 +83,5 @@ else()
         DEPENDS libpng-debug libpng-release
         )
 endif()
+
+add_custom_target(libpng ALL DEPENDS libpng-postinst)

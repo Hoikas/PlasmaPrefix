@@ -27,7 +27,7 @@ unpack_tgz(string_theory-2.0.tar.gz string_theory-2.0)
 
 add_custom_target(string_theory-build
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}"
-                -DST_BUILD_STATIC=${BUILD_STATIC_LIBS}
+                -DST_BUILD_STATIC=${BUILD_STATIC_LIBS} -DST_BUILD_TESTS=OFF
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}"
                 -Hstring_theory-2.0 -Bstring_theory-release
     COMMAND ${CMAKE_COMMAND} --build string_theory-release --config Debug
