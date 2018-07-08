@@ -49,7 +49,7 @@ add_custom_target(zlib-release
     )
 
 if(BUILD_STATIC_LIBS)
-    add_custom_target(zlib
+    add_custom_target(zlib-postinst
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/bin"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/share"
@@ -64,7 +64,7 @@ if(BUILD_STATIC_LIBS)
         DEPENDS zlib-debug zlib-release
         )
 else()
-    add_custom_target(zlib
+    add_custom_target(zlib-postinst
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/share"
         COMMAND ${CMAKE_COMMAND} -E remove "${INSTALL_DIR}/debug/lib/zlibstaticd.lib"
@@ -73,3 +73,5 @@ else()
         DEPENDS zlib-debug zlib-release
         )
 endif()
+
+add_custom_target(zlib ALL DEPENDS zlib-postinst)
