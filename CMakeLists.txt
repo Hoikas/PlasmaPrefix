@@ -45,33 +45,45 @@ else()
     message(FATAL_ERROR "Unsupported or unknown BUILD_ARCH ${BUILD_ARCH}")
 endif()
 
-function(_unpack_archive tarball tarflags pkgdir)
-    if(NOT EXISTS "${CMAKE_BINARY_DIR}/${pkgdir}")
+function(_unpack_archive tarball pkgdir)
+    cmake_parse_arguments(_unarch "" "DEST_DIR" "TAR_FLAGS" ${ARGN})
+    if(NOT DEFINED _unarch_DEST_DIR)
+        set(_unarch_DEST_DIR "${CMAKE_BINARY_DIR}")
+    endif()
+    if(NOT EXISTS "${_unarch_DEST_DIR}")
+        file(MAKE_DIRECTORY "${_unarch_DEST_DIR}")
+    endif()
+    if(NOT EXISTS "${_unarch_DEST_DIR}/${pkgdir}")
         message(STATUS "Unpacking ${tarball}")
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar ${tarflags} ${tarball}
-            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+            COMMAND ${CMAKE_COMMAND} -E tar ${_unarch_TAR_FLAGS}
+            WORKING_DIRECTORY "${_unarch_DEST_DIR}"
         )
     endif()
 endfunction()
 
 function(unpack_tgz tarball pkgdir)
-    _unpack_archive(${tarball} xzf ${pkgdir})
+    _unpack_archive("${tarball}" "${pkgdir}" ${ARGN}
+        TAR_FLAGS xzf "${CMAKE_BINARY_DIR}/${tarball}"
+        )
 endfunction()
 
 function(unpack_txz tarball pkgdir)
-    _unpack_archive(${tarball} xJf ${pkgdir})
+    _unpack_archive("${tarball}" "${pkgdir}" ${ARGN}
+        TAR_FLAGS xJf "${CMAKE_BINARY_DIR}/${tarball}"
+        )
 endfunction()
 
 function(unpack_zip tarball pkgdir)
-    # The docs state cmake -E tar can unpack zip files, but doesn't give
-    # any hint on the tar flags to use.  xzf seems to work...
-    _unpack_archive(${tarball} xzf ${pkgdir})
+    _unpack_archive("${tarball}" "${pkgdir}" ${ARGN}
+        TAR_FLAGS xf "${CMAKE_BINARY_DIR}/${tarball}" --format=zip
+        )
 endfunction()
 
 # Build tools
 include(nasm.cmake)
 include(patch.cmake)
+include(perl.cmake)
 
 # Packages
 include(zlib.cmake)
