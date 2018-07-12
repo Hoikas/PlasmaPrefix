@@ -58,12 +58,14 @@ set MAKEFLAGS=
 nmake /f ${OPENSSL_MAKEFILE} %*
 ")
 
+file(TO_CMAKE_PATH "${INSTALL_DIR}" INSTALL_DIR_CMAKE)
+
 # TODO: Is there any need to build openssl in debug mode?
 add_custom_target(openssl-release
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}"
                 ${PERL_COMMAND} Configure --prefix="${INSTALL_DIR}"
-                zlib --with-zlib-lib="${INSTALL_DIR}/lib/zlib.lib"
-                --with-zlib-include="${INSTALL_DIR}/include" ${OPENSSL_TARGET}
+                zlib --with-zlib-lib="${INSTALL_DIR_CMAKE}/lib/zlib.lib"
+                --with-zlib-include="${INSTALL_DIR_CMAKE}/include" ${OPENSSL_TARGET}
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${OPENSSL_TARGET_BAT}"
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}"
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}" install
