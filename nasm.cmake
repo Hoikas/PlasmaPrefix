@@ -25,4 +25,5 @@ file(DOWNLOAD "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win32/nasm-2.1
     )
 
 unpack_zip(nasm-2.13.03-win32.zip nasm-2.13.03)
-set(NASM_PATH "${CMAKE_BINARY_DIR}/nasm-2.13.03/nasm.exe")
+set(NASM_PATH "${CMAKE_BINARY_DIR}/nasm-2.13.03")
+set(NASM_COMMAND "${NASM_COMMAND}/nasm.exe")

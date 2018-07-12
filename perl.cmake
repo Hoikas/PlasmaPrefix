@@ -27,4 +27,5 @@ file(DOWNLOAD "http://strawberryperl.com/download/5.24.4.1/strawberry-perl-5.24.
 unpack_zip(strawberry-perl-5.24.4.1-32bit-portable.zip perl
     DEST_DIR "${CMAKE_BINARY_DIR}/strawberry-perl"
     )
-set(PERL_PATH "${CMAKE_BINARY_DIR}/strawberry-perl/perl/bin/perl.exe")
+set(PERL_PATH "${CMAKE_BINARY_DIR}/strawberry-perl/perl/bin")
+set(PERL_COMMAND "${PERL_PATH}/perl.exe")

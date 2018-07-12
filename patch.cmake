@@ -20,22 +20,26 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-function(apply_patch patchvar patch source_path)
-    if(NOT EXISTS "${source_path}/.${patchvar}-applied")
+function(apply_patch patch source_path)
+    get_filename_component(patch_name "${patch}" NAME)
+    if(NOT EXISTS "${source_path}/.${patch_name}-applied")
         find_program(GIT NAMES git git.cmd)
+        if(NOT GIT)
+            message(FATAL_ERROR "Could not find git executable")
+        endif()
 
-        message(STATUS "Applying patch ${patch}")
+        message(STATUS "Applying patch ${patch_name}")
         execute_process(
-            COMMAND ${GIT} --work-tree=. --git-dir=.git apply "${CMAKE_BINARY_DIR}/${patch}"
+            COMMAND ${GIT} --work-tree=. --git-dir=.git apply "${patch}"
                         --ignore-whitespace --whitespace=nowarn --verbose
             WORKING_DIRECTORY "${source_path}"
             RESULT_VARIABLE error_code
             )
 
         if(error_code)
-            message(FATAL_ERROR "Applying patch ${patch} failed.")
+            message(FATAL_ERROR "Applying patch ${patch_name} failed.")
         endif()
 
-        file(WRITE "${source_path}/.${patchvar}-applied" "")
+        file(WRITE "${source_path}/.${patch_name}-applied" "")
     endif()
 endfunction()

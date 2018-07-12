@@ -25,13 +25,8 @@ file(DOWNLOAD "https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-1.5.
     )
 unpack_tgz(libjpeg-turbo-1.5.3.tar.gz libjpeg-turbo-1.5.3)
 
-file(DOWNLOAD "https://raw.githubusercontent.com/Microsoft/vcpkg/89589c000a6f523fba8f7b44582a1347694b9ece/ports/libjpeg-turbo/add-options-for-exes-docs-headers.patch"
-    "${CMAKE_BINARY_DIR}/add-options-for-exes-docs-headers.patch"
-    EXPECTED_HASH SHA256=39d73a4b638f80d1975c1fa8dfd1b13881c4291e717531b56c287a16c3a460e9
-    STATUS libjpeg-turbo_p0_STATUS
-    )
-apply_patch(libjpeg-turbo_p0
-    add-options-for-exes-docs-headers.patch
+apply_patch(
+    "${CMAKE_SOURCE_DIR}/patches/libjpeg-turbo/add-options-for-exes-docs-headers.patch"
     "${CMAKE_BINARY_DIR}/libjpeg-turbo-1.5.3"
     )
 
@@ -42,7 +37,7 @@ else()
 endif()
 set(JPEGT_CMAKE_ARGS ${JPEGT_CMAKE_ARGS} -DWITH_CRT_DLL=ON -DWITH_SIMD=ON
                         -DENABLE_EXECUTABLES=OFF -DINSTALL_DOCS=OFF
-                        -DNASM="${NASM_PATH}"
+                        -DNASM="${NASM_COMMAND}"
     )
 
 add_custom_target(libjpeg-turbo-debug
