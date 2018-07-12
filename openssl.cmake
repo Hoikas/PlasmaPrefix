@@ -70,7 +70,7 @@ add_custom_target(openssl-release
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}"
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}" install
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/openssl-1.0.2o"
-    COMMENT "Building openssl-debug"
+    COMMENT "Building openssl-release"
     DEPENDS zlib
     )
 
