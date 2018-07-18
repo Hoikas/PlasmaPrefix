@@ -18,18 +18,20 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-file(DOWNLOAD "https://github.com/zrax/string_theory/archive/2.0.tar.gz"
-    "${CMAKE_BINARY_DIR}/string_theory-2.0.tar.gz"
-    EXPECTED_HASH SHA256=cf5dbb4f521300c9bac928b3bc4e0602680b24b3e0c9892c296673d96931d7ed
+set(ST_VERSION 2.1)
+
+file(DOWNLOAD "https://github.com/zrax/string_theory/archive/${ST_VERSION}.tar.gz"
+    "${CMAKE_BINARY_DIR}/string_theory-${ST_VERSION}.tar.gz"
+    EXPECTED_HASH SHA256=abb4e67320d82149aad289c714a089bf25b9956d81dd0010dfdc1dc1492c0b8c
     STATUS string_theory_STATUS SHOW_PROGRESS
     )
-unpack_tgz(string_theory-2.0.tar.gz string_theory-2.0)
+unpack_tgz(string_theory-${ST_VERSION}.tar.gz string_theory-${ST_VERSION})
 
 add_custom_target(string_theory-build
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}"
                 -DST_BUILD_STATIC=${BUILD_STATIC_LIBS} -DST_BUILD_TESTS=OFF
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}"
-                -Hstring_theory-2.0 -Bstring_theory-release
+                -Hstring_theory-${ST_VERSION} -Bstring_theory-release
     COMMAND ${CMAKE_COMMAND} --build string_theory-release --config Debug
     COMMAND ${CMAKE_COMMAND} --build string_theory-release --config Debug --target INSTALL
     COMMAND ${CMAKE_COMMAND} --build string_theory-release --config Release

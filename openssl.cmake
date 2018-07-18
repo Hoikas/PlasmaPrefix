@@ -19,16 +19,18 @@
 # DEALINGS IN THE SOFTWARE.
 
 # NOTE: Not using OpenSSL 1.1 yet due to removed support for SHA0
-file(DOWNLOAD "http://www.openssl.org/source/openssl-1.0.2o.tar.gz"
-    "${CMAKE_BINARY_DIR}/openssl-1.0.2o.tar.gz"
+set(openssl_VERSION 1.0.2o)
+
+file(DOWNLOAD "http://www.openssl.org/source/openssl-${openssl_VERSION}.tar.gz"
+    "${CMAKE_BINARY_DIR}/openssl-${openssl_VERSION}.tar.gz"
     EXPECTED_HASH SHA256=ec3f5c9714ba0fd45cb4e087301eb1336c317e0d20b575a125050470e8089e4d
     SHOW_PROGRESS
     )
-unpack_txz(openssl-1.0.2o.tar.gz openssl-1.0.2o)
+unpack_txz(openssl-${openssl_VERSION}.tar.gz openssl-${openssl_VERSION})
 
 apply_patch(
     "${CMAKE_SOURCE_DIR}/patches/openssl/msvc-runtime.patch"
-    "${CMAKE_BINARY_DIR}/openssl-1.0.2o"
+    "${CMAKE_BINARY_DIR}/openssl-${openssl_VERSION}"
     )
 
 if(BUILD_ARCH STREQUAL "x86")
@@ -51,7 +53,7 @@ endif()
 
 set(BUILD_PATH_EXT "$ENV{PATH};${PERL_PATH};${NASM_PATH}")
 
-set(BUILD_SCRIPT "${CMAKE_BINARY_DIR}/openssl-1.0.2o/plasma_build.bat")
+set(BUILD_SCRIPT "${CMAKE_BINARY_DIR}/openssl-${openssl_VERSION}/plasma_build.bat")
 file(WRITE "${BUILD_SCRIPT}" "
 call \"${VCVARSALL_BAT}\" ${VCVARSALL_ARCH}
 set MAKEFLAGS=
@@ -69,7 +71,7 @@ add_custom_target(openssl-release
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${OPENSSL_TARGET_BAT}"
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}"
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}" install
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/openssl-1.0.2o"
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/openssl-${openssl_VERSION}"
     COMMENT "Building openssl-release"
     DEPENDS zlib
     )

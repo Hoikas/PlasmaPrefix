@@ -18,16 +18,18 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-file(DOWNLOAD "https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-1.5.3.tar.gz"
-    "${CMAKE_BINARY_DIR}/libjpeg-turbo-1.5.3.tar.gz"
+set(jpeg_turbo_VERSION 1.5.3)
+
+file(DOWNLOAD "https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-${jpeg_turbo_VERSION}.tar.gz"
+    "${CMAKE_BINARY_DIR}/libjpeg-turbo-${jpeg_turbo_VERSION}.tar.gz"
     EXPECTED_HASH SHA256=b24890e2bb46e12e72a79f7e965f409f4e16466d00e1dd15d93d73ee6b592523
     SHOW_PROGRESS
     )
-unpack_tgz(libjpeg-turbo-1.5.3.tar.gz libjpeg-turbo-1.5.3)
+unpack_tgz(libjpeg-turbo-${jpeg_turbo_VERSION}.tar.gz libjpeg-turbo-${jpeg_turbo_VERSION})
 
 apply_patch(
     "${CMAKE_SOURCE_DIR}/patches/libjpeg-turbo/add-options-for-exes-docs-headers.patch"
-    "${CMAKE_BINARY_DIR}/libjpeg-turbo-1.5.3"
+    "${CMAKE_BINARY_DIR}/libjpeg-turbo-${jpeg_turbo_VERSION}"
     )
 
 if(BUILD_STATIC_LIBS)
@@ -43,7 +45,7 @@ set(JPEGT_CMAKE_ARGS ${JPEGT_CMAKE_ARGS} -DWITH_CRT_DLL=ON -DWITH_SIMD=ON
 add_custom_target(libjpeg-turbo-debug
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}" ${JPEGT_CMAKE_ARGS}
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}/debug"
-                -Hlibjpeg-turbo-1.5.3 -Blibjpeg-turbo-debug
+                -Hlibjpeg-turbo-${jpeg_turbo_VERSION} -Blibjpeg-turbo-debug
     COMMAND ${CMAKE_COMMAND} --build libjpeg-turbo-debug --config Debug
     COMMAND ${CMAKE_COMMAND} --build libjpeg-turbo-debug --config Debug --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -53,7 +55,7 @@ add_custom_target(libjpeg-turbo-debug
 add_custom_target(libjpeg-turbo-release
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}" ${JPEGT_CMAKE_ARGS}
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}"
-                -Hlibjpeg-turbo-1.5.3 -Blibjpeg-turbo-release
+                -Hlibjpeg-turbo-${jpeg_turbo_VERSION} -Blibjpeg-turbo-release
     COMMAND ${CMAKE_COMMAND} --build libjpeg-turbo-release --config Release
     COMMAND ${CMAKE_COMMAND} --build libjpeg-turbo-release --config Release --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"

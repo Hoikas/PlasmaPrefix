@@ -18,12 +18,14 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-file(DOWNLOAD "https://download.sourceforge.net/libpng/libpng-1.6.34.tar.xz"
-    "${CMAKE_BINARY_DIR}/libpng-1.6.34.tar.xz"
+set(png_VERSION 1.6.34)
+
+file(DOWNLOAD "https://download.sourceforge.net/libpng/libpng-${png_VERSION}.tar.xz"
+    "${CMAKE_BINARY_DIR}/libpng-${png_VERSION}.tar.xz"
     EXPECTED_HASH MD5=c05b6ca7190a5e387b78657dbe5536b2
     SHOW_PROGRESS
     )
-unpack_txz(libpng-1.6.34.tar.xz libpng-1.6.34)
+unpack_txz(libpng-${png_VERSION}.tar.xz libpng-${png_VERSION})
 
 if(BUILD_STATIC_LIBS)
     set(LIBPNG_CMAKE_ARGS -DPNG_STATIC=ON -DPNG_SHARED=OFF)
@@ -41,7 +43,7 @@ set(LIBPNG_CMAKE_ARGS ${LIBPNG_CMAKE_ARGS} ${ZLIB_ARGS})
 add_custom_target(libpng-debug
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}" ${LIBPNG_CMAKE_ARGS}
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}/debug"
-                -Hlibpng-1.6.34 -Blibpng-debug
+                -Hlibpng-${png_VERSION} -Blibpng-debug
     COMMAND ${CMAKE_COMMAND} --build libpng-debug --config Debug
     COMMAND ${CMAKE_COMMAND} --build libpng-debug --config Debug --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -52,7 +54,7 @@ add_custom_target(libpng-debug
 add_custom_target(libpng-release
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}" ${LIBPNG_CMAKE_ARGS}
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}"
-                -Hlibpng-1.6.34 -Blibpng-release
+                -Hlibpng-${png_VERSION} -Blibpng-release
     COMMAND ${CMAKE_COMMAND} --build libpng-release --config Release
     COMMAND ${CMAKE_COMMAND} --build libpng-release --config Release --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"

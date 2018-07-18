@@ -18,12 +18,14 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-file(DOWNLOAD "https://www.nasm.us/pub/nasm/releasebuilds/2.13.03/win32/nasm-2.13.03-win32.zip"
-    "${CMAKE_BINARY_DIR}/nasm-2.13.03-win32.zip"
+set(nasm_VERSION 2.13.03)
+
+file(DOWNLOAD "https://www.nasm.us/pub/nasm/releasebuilds/${nasm_VERSION}/win32/nasm-${nasm_VERSION}-win32.zip"
+    "${CMAKE_BINARY_DIR}/nasm-${nasm_VERSION}-win32.zip"
     EXPECTED_HASH SHA256=046ed0b14f8b874863dd43e0534ad47727b022194278f2f79df108c7357afcff
     SHOW_PROGRESS
     )
 
-unpack_zip(nasm-2.13.03-win32.zip nasm-2.13.03)
-set(NASM_PATH "${CMAKE_BINARY_DIR}/nasm-2.13.03")
+unpack_zip(nasm-${nasm_VERSION}-win32.zip nasm-${nasm_VERSION})
+set(NASM_PATH "${CMAKE_BINARY_DIR}/nasm-${nasm_VERSION}")
 set(NASM_COMMAND "${NASM_PATH}/nasm.exe")

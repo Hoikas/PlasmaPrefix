@@ -18,17 +18,19 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-file(DOWNLOAD "https://zlib.net/zlib-1.2.11.tar.xz"
-    "${CMAKE_BINARY_DIR}/zlib-1.2.11.tar.xz"
+set(zlib_VERSION 1.2.11)
+
+file(DOWNLOAD "https://zlib.net/zlib-${zlib_VERSION}.tar.xz"
+    "${CMAKE_BINARY_DIR}/zlib-${zlib_VERSION}.tar.xz"
     EXPECTED_HASH SHA256=4ff941449631ace0d4d203e3483be9dbc9da454084111f97ea0a2114e19bf066
     SHOW_PROGRESS
     )
-unpack_txz(zlib-1.2.11.tar.xz zlib-1.2.11)
+unpack_txz(zlib-${zlib_VERSION}.tar.xz zlib-${zlib_VERSION})
 
 add_custom_target(zlib-debug
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}"
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}/debug"
-                -Hzlib-1.2.11 -Bzlib-debug
+                -Hzlib-${zlib_VERSION} -Bzlib-debug
     COMMAND ${CMAKE_COMMAND} --build zlib-debug --config Debug
     COMMAND ${CMAKE_COMMAND} --build zlib-debug --config Debug --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -38,7 +40,7 @@ add_custom_target(zlib-debug
 add_custom_target(zlib-release
     COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}"
                 -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}"
-                -Hzlib-1.2.11 -Bzlib-release
+                -Hzlib-${zlib_VERSION} -Bzlib-release
     COMMAND ${CMAKE_COMMAND} --build zlib-release --config Release
     COMMAND ${CMAKE_COMMAND} --build zlib-release --config Release --target INSTALL
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"

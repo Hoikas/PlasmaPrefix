@@ -18,13 +18,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-file(DOWNLOAD "http://strawberryperl.com/download/5.24.4.1/strawberry-perl-5.24.4.1-32bit-portable.zip"
-    "${CMAKE_BINARY_DIR}/strawberry-perl-5.24.4.1-32bit-portable.zip"
+set(perl_VERSION 5.24.4.1)
+
+file(DOWNLOAD "http://strawberryperl.com/download/${perl_VERSION}/strawberry-perl-${perl_VERSION}-32bit-portable.zip"
+    "${CMAKE_BINARY_DIR}/strawberry-perl-${perl_VERSION}-32bit-portable.zip"
     EXPECTED_HASH SHA1=0ec52e7864e1b90128399e36858fa2a000be8360
     SHOW_PROGRESS
     )
 
-unpack_zip(strawberry-perl-5.24.4.1-32bit-portable.zip perl
+unpack_zip(strawberry-perl-${perl_VERSION}-32bit-portable.zip perl
     DEST_DIR "${CMAKE_BINARY_DIR}/strawberry-perl"
     )
 set(PERL_PATH "${CMAKE_BINARY_DIR}/strawberry-perl/perl/bin")
