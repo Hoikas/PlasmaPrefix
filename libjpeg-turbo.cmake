@@ -39,7 +39,7 @@ else()
 endif()
 set(JPEGT_CMAKE_ARGS ${JPEGT_CMAKE_ARGS} -DWITH_CRT_DLL=ON -DWITH_SIMD=ON
                         -DENABLE_EXECUTABLES=OFF -DINSTALL_DOCS=OFF
-                        -DNASM="${NASM_COMMAND}"
+                        -DWITH_JPEG8=ON -DNASM="${NASM_COMMAND}"
     )
 
 add_custom_target(libjpeg-turbo-debug
