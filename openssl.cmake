@@ -44,10 +44,8 @@ else()
 endif()
 
 if(BUILD_STATIC_LIBS)
-    set(OPENSSL_TARGET ${OPENSSL_TARGET} no-shared)
     set(OPENSSL_MAKEFILE "ms\\nt.mak")
 else()
-    set(OPENSSL_TARGET ${OPENSSL_TARGET} shared)
     set(OPENSSL_MAKEFILE "ms\\ntdll.mak")
 endif()
 
@@ -62,18 +60,45 @@ nmake /f ${OPENSSL_MAKEFILE} %*
 
 file(TO_CMAKE_PATH "${INSTALL_DIR}" INSTALL_DIR_CMAKE)
 
-# TODO: Is there any need to build openssl in debug mode?
+file(COPY "${CMAKE_BINARY_DIR}/openssl-${openssl_VERSION}"
+    DESTINATION "${CMAKE_BINARY_DIR}/openssl-debug"
+    )
+add_custom_target(openssl-debug
+    COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}"
+                ${PERL_COMMAND} Configure --prefix="${INSTALL_DIR}/debug"
+                zlib --with-zlib-lib="${INSTALL_DIR_CMAKE}/debug/lib/zlibd.lib"
+                --with-zlib-include="${INSTALL_DIR_CMAKE}/include"
+                debug-${OPENSSL_TARGET}
+    COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${OPENSSL_TARGET_BAT}"
+    COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}"
+    COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}" install
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/openssl-debug/openssl-${openssl_VERSION}"
+    COMMENT "Building openssl-debug"
+    DEPENDS zlib
+    )
+
+file(COPY "${CMAKE_BINARY_DIR}/openssl-${openssl_VERSION}"
+    DESTINATION "${CMAKE_BINARY_DIR}/openssl-release"
+    )
 add_custom_target(openssl-release
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}"
                 ${PERL_COMMAND} Configure --prefix="${INSTALL_DIR}"
                 zlib --with-zlib-lib="${INSTALL_DIR_CMAKE}/lib/zlib.lib"
-                --with-zlib-include="${INSTALL_DIR_CMAKE}/include" ${OPENSSL_TARGET}
+                --with-zlib-include="${INSTALL_DIR_CMAKE}/include"
+                ${OPENSSL_TARGET}
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${OPENSSL_TARGET_BAT}"
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}"
     COMMAND ${CMAKE_COMMAND} -E env "PATH=${BUILD_PATH_EXT}" "${BUILD_SCRIPT}" install
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/openssl-${openssl_VERSION}"
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/openssl-release/openssl-${openssl_VERSION}"
     COMMENT "Building openssl-release"
     DEPENDS zlib
     )
 
-add_custom_target(openssl ALL DEPENDS openssl-release)
+add_custom_target(openssl-postinst
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/ssl"
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    DEPENDS openssl-debug openssl-release
+    )
+
+add_custom_target(openssl ALL DEPENDS openssl-postinst)
