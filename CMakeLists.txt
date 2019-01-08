@@ -31,21 +31,21 @@ set(INSTALL_DIR "${CMAKE_SOURCE_DIR}/prefix" CACHE STRING "Path to install built
 set(EnvProgramFilesX86 "ProgramFiles(x86)")
 
 if(MSVC_VERSION STREQUAL "2013")
-    set(VCSLN_GENERATOR "Visual Studio 12 2013")
+    set(MSVC_SHORT_VERSION "12")
     set(VCVARS_SEARCH_PATHS
         "$ENV{ProgramFiles}\\Microsoft Visual Studio 12.0\\VC"
         "$ENV{${EnvProgramFilesX86}}\\Microsoft Visual Studio 12.0\\VC"
         "$ENV{ProgramW6432}\\Microsoft Visual Studio 12.0\\VC"
         )
 elseif(MSVC_VERSION STREQUAL "2015")
-    set(VCSLN_GENERATOR "Visual Studio 14 2015")
+    set(MSVC_SHORT_VERSION "14")
     set(VCVARS_SEARCH_PATHS
         "$ENV{ProgramFiles}\\Microsoft Visual Studio 14.0\\VC"
         "$ENV{${EnvProgramFilesX86}}\\Microsoft Visual Studio 14.0\\VC"
         "$ENV{ProgramW6432}\\Microsoft Visual Studio 14.0\\VC"
         )
 elseif(MSVC_VERSION STREQUAL "2017")
-    set(VCSLN_GENERATOR "Visual Studio 15 2017")
+    set(MSVC_SHORT_VERSION "15")
     set(VCVARS_SEARCH_PATHS
         "$ENV{ProgramFiles}\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build"
         "$ENV{${EnvProgramFilesX86}}\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build"
@@ -60,6 +60,8 @@ elseif(MSVC_VERSION STREQUAL "2017")
 else()
     message(FATAL_ERROR "Unsupported or unknown MSVC_VERSION ${MSVC_VERSION}")
 endif()
+
+set(VCSLN_GENERATOR "Visual Studio ${MSVC_SHORT_VERSION} ${MSVC_VERSION}")
 
 if(BUILD_ARCH STREQUAL "x86")
     # No generator suffix
@@ -129,3 +131,4 @@ include(libpng.cmake)
 include(libjpeg-turbo.cmake)
 include(string_theory.cmake)
 include(openssl.cmake)
+include(curl.cmake)
