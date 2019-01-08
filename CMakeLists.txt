@@ -108,6 +108,12 @@ function(unpack_tgz tarball pkgdir)
         )
 endfunction()
 
+function(unpack_tbz2 tarball pkgdir)
+    _unpack_archive("${tarball}" "${pkgdir}" ${ARGN}
+        TAR_FLAGS xjf "${CMAKE_BINARY_DIR}/${tarball}"
+        )
+endfunction()
+
 function(unpack_txz tarball pkgdir)
     _unpack_archive("${tarball}" "${pkgdir}" ${ARGN}
         TAR_FLAGS xJf "${CMAKE_BINARY_DIR}/${tarball}"
@@ -132,3 +138,4 @@ include(libjpeg-turbo.cmake)
 include(string_theory.cmake)
 include(openssl.cmake)
 include(curl.cmake)
+include(expat.cmake)
