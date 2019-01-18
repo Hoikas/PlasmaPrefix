@@ -22,7 +22,7 @@ set(opus_VERSION 1.3)
 
 file(DOWNLOAD "http://downloads.xiph.org/releases/opus/opus-${opus_VERSION}.tar.gz"
     "${CMAKE_BINARY_DIR}/opus-${opus_VERSION}.tar.gz"
-    EXPECTED_HASH SHA256=f5a7085b767e89d76271baf5587ae6394f2a7f2a674e6ef86dd621379198e156
+    EXPECTED_HASH SHA256=4f3d69aefdf2dbaf9825408e452a8a414ffc60494c70633560700398820dc550
     SHOW_PROGRESS
     )
 unpack_tgz(opus-${opus_VERSION}.tar.gz opus-${opus_VERSION})
