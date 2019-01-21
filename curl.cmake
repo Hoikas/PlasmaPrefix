@@ -27,85 +27,64 @@ file(DOWNLOAD "https://curl.haxx.se/download/curl-${curl_VERSION}.tar.xz"
     )
 unpack_txz(curl-${curl_VERSION}.tar.xz curl-${curl_VERSION})
 
+# CURL claims that CMake is "poorly maintained", but in fact it builds
+# a version of libcurl that works correctly whereas the MSVC Makefiles
+# do not.  Therefore, we use cmake.
 if(BUILD_STATIC_LIBS)
-    set(CURL_LIBTYPE "static")
+    set(CURL_CMAKE_ARGS -DBUILD_SHARED_LIBS=OFF -DCURL_STATICLIB=ON)
 else()
-    set(CURL_LIBTYPE "dll")
+    set(CURL_CMAKE_ARGS -DBUILD_SHARED_LIBS=ON -DCURL_STATICLIB=OFF)
 endif()
 
-set(BUILD_SCRIPT "${CMAKE_BINARY_DIR}/curl-${curl_VERSION}/winbuild/plasma_build.bat")
-file(WRITE "${BUILD_SCRIPT}" "
-call \"${VCVARSALL_BAT}\" ${VCVARSALL_ARCH}
-nmake /f Makefile.vc MODE=${CURL_LIBTYPE} \
-  VC=${MSVC_SHORT_VERSION} \
-  WITH_DEVEL=${INSTALL_DIR} \
-  WITH_SSL=${CURL_LIBTYPE} \
-  WITH_ZLIB=${CURL_LIBTYPE} \
-  MACHINE=${BUILD_ARCH} \
-  ENABLE_IPV6=yes \
-  ENABLE_SSPI=yes \
-  ENABLE_IDN=yes \
-  %*
-")
+set(ZLIB_ARGS
+    -DZLIB_INCLUDE_DIR="${INSTALL_DIR}/include"
+    -DZLIB_LIBRARY_DEBUG="${INSTALL_DIR}/debug/lib/zlibd.lib"
+    -DZLIB_LIBRARY_RELEASE="${INSTALL_DIR}/lib/zlib.lib"
+    )
+set(OPENSSL_ARGS
+    -DOPENSSL_INCLUDE_DIR="${INSTALL_DIR}/include"
+    -DLIB_EAY_DEBUG="${INSTALL_DIR}/debug/lib/libeay32.lib"
+    -DSSL_EAY_DEBUG="${INSTALL_DIR}/debug/lib/ssleay32.lib"
+    -DLIB_EAY_RELEASE="${INSTALL_DIR}/lib/libeay32.lib"
+    -DSSL_EAY_RELEASE="${INSTALL_DIR}/lib/ssleay32.lib"
+    )
 
-# These write their output to different build directories, so no extra
-# source tree copy is necessary
+set(CURL_CMAKE_ARGS ${CURL_CMAKE_ARGS} -DENABLE_MANUAL=OFF
+    -DCMAKE_USE_OPENSSL=ON -DCURL_ZLIB=ON -DUSE_WIN32_LDAP=OFF
+    -DPERL_EXECUTABLE="${PERL_COMMAND}" ${ZLIB_ARGS} ${OPENSSL_ARGS})
+
 add_custom_target(curl-debug
-    COMMAND ${CMAKE_COMMAND} -E env "${BUILD_SCRIPT}" DEBUG=yes
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/curl-${curl_VERSION}/winbuild"
+    COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}" ${CURL_CMAKE_ARGS}
+                -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}/debug"
+                -Hcurl-${curl_VERSION} -Bcurl-debug
+    COMMAND ${CMAKE_COMMAND} --build curl-debug --config Debug
+    COMMAND ${CMAKE_COMMAND} --build curl-debug --config Debug --target INSTALL
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     COMMENT "Building curl-debug"
     DEPENDS zlib openssl
     )
 
 add_custom_target(curl-release
-    COMMAND ${CMAKE_COMMAND} -E env "${BUILD_SCRIPT}" DEBUG=no
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/curl-${curl_VERSION}/winbuild"
+    COMMAND ${CMAKE_COMMAND} -G "${VCSLN_GENERATOR}" ${CURL_CMAKE_ARGS}
+                -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}"
+                -Hcurl-${curl_VERSION} -Bcurl-release
+    COMMAND ${CMAKE_COMMAND} --build curl-release --config Release
+    COMMAND ${CMAKE_COMMAND} --build curl-release --config Release --target INSTALL
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     COMMENT "Building curl-release"
     DEPENDS zlib openssl
     )
 
-# The Windows makefile does not include an install target
-set(CURL_DEBUG_OUTDIR "${CMAKE_BINARY_DIR}/curl-${curl_VERSION}/builds/libcurl-vc${MSVC_SHORT_VERSION}-${BUILD_ARCH}-debug-${CURL_LIBTYPE}-ssl-${CURL_LIBTYPE}-zlib-${CURL_LIBTYPE}-ipv6-sspi")
-set(CURL_RELEASE_OUTDIR "${CMAKE_BINARY_DIR}/curl-${curl_VERSION}/builds/libcurl-vc${MSVC_SHORT_VERSION}-${BUILD_ARCH}-release-${CURL_LIBTYPE}-ssl-${CURL_LIBTYPE}-zlib-${CURL_LIBTYPE}-ipv6-sspi")
-
-if(BUILD_STATIC_LIBS)
-    add_custom_target(curl-postinst
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CURL_RELEASE_OUTDIR}/include"
-                    "${INSTALL_DIR}/include"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${INSTALL_DIR}/debug/bin" "${INSTALL_DIR}/bin"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_DEBUG_OUTDIR}/bin/curl.exe"
-                    "${INSTALL_DIR}/debug/bin"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_RELEASE_OUTDIR}/bin/curl.exe"
-                    "${INSTALL_DIR}/bin"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${INSTALL_DIR}/debug/lib" "${INSTALL_DIR}/lib"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_DEBUG_OUTDIR}/lib/libcurl_a_debug.lib"
-                    "${INSTALL_DIR}/debug/lib"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_RELEASE_OUTDIR}/lib/libcurl_a.lib"
-                    "${INSTALL_DIR}/lib"
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-        DEPENDS curl-debug curl-release
-        )
-else()
-    add_custom_target(curl-postinst
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CURL_RELEASE_OUTDIR}/include"
-                    "${INSTALL_DIR}/include"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${INSTALL_DIR}/debug/bin" "${INSTALL_DIR}/bin"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_DEBUG_OUTDIR}/bin/libcurl_debug.dll"
-                    "${CURL_DEBUG_OUTDIR}/bin/curl.exe"
-                    "${INSTALL_DIR}/debug/bin"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_RELEASE_OUTDIR}/bin/libcurl.dll"
-                    "${CURL_RELEASE_OUTDIR}/bin/curl.exe"
-                    "${INSTALL_DIR}/bin"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${INSTALL_DIR}/debug/lib" "${INSTALL_DIR}/lib"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_DEBUG_OUTDIR}/lib/libcurl_debug.exp"
-                    "${CURL_DEBUG_OUTDIR}/lib/libcurl_debug.lib"
-                    "${INSTALL_DIR}/debug/lib"
-        COMMAND ${CMAKE_COMMAND} -E copy "${CURL_RELEASE_OUTDIR}/lib/libcurl.exp"
-                    "${CURL_RELEASE_OUTDIR}/lib/libcurl.lib"
-                    "${INSTALL_DIR}/lib"
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-        DEPENDS curl-debug curl-release
-        )
-endif()
+add_custom_target(curl-postinst
+    COMMAND ${CMAKE_COMMAND} -E remove "${INSTALL_DIR}/debug/bin/curl-config"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/lib/cmake"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/lib/pkgconfig"
+    # Also remove the libcurl CMake files, since CMake itself doesn't use
+    # them and they're generally considered broken.
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/lib/cmake/CURL"
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    DEPENDS curl-debug curl-release
+    )
 
 add_custom_target(curl ALL DEPENDS curl-postinst)

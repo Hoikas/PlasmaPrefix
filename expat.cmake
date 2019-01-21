@@ -59,6 +59,7 @@ add_custom_target(expat-release
 
 add_custom_target(expat-postinst
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/include"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${INSTALL_DIR}/debug/lib/pkgconfig"
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
     DEPENDS expat-debug expat-release
     )
