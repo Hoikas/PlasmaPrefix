@@ -1,60 +1,25 @@
 version: '{build}'
 
-environment:
-  matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
-      PREFIX_MSVC: 2013
-      PREFIX_ARCH: x86
-      PREFIX_STATIC: ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
-      PREFIX_MSVC: 2013
-      PREFIX_ARCH: x86
-      PREFIX_STATIC: OFF
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      PREFIX_MSVC: 2015
-      PREFIX_ARCH: x86
-      PREFIX_STATIC: ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      PREFIX_MSVC: 2015
-      PREFIX_ARCH: x86
-      PREFIX_STATIC: OFF
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PREFIX_MSVC: 2017
-      PREFIX_ARCH: x86
-      PREFIX_STATIC: ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PREFIX_MSVC: 2017
-      PREFIX_ARCH: x86
-      PREFIX_STATIC: OFF
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PREFIX_MSVC: 2017
-      PREFIX_ARCH: x64
-      PREFIX_STATIC: ON
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PREFIX_MSVC: 2017
-      PREFIX_ARCH: x64
-      PREFIX_STATIC: OFF
+image: Visual Studio 2015
 
 build_script:
-  - mkdir build && cd build
-  - if [%PREFIX_STATIC%]==[ON] (
-      set "PREFIX_DIR=prefix-vc%PREFIX_MSVC%-%PREFIX_ARCH%-static"
-    ) else (
-      set "PREFIX_DIR=prefix-vc%PREFIX_MSVC%-%PREFIX_ARCH%"
-    )
-  - cmake -DBUILD_STATIC_LIBS=%PREFIX_STATIC% -DBUILD_ARCH=%PREFIX_ARCH%
-      -DMSVC_VERSION=%PREFIX_MSVC%
-      -DINSTALL_DIR="%APPVEYOR_BUILD_FOLDER%/%PREFIX_DIR%" ..
-  - cmake --build .
-  - cd "%APPVEYOR_BUILD_FOLDER%"
-  - cmake -E tar cf %PREFIX_DIR%.zip --format=zip %PREFIX_DIR%
+  - ps: |
+      $outpath = (Get-Location).Path
+
+      Set-Location C:\tools\vcpkg
+      # Create our own custom triplet, for static-linking of libraries, but dynamic CRT linkage.
+      Set-Content -Path "triplets/x86-windows-static-dyncrt.cmake" -Value "set(VCPKG_TARGET_ARCHITECTURE x86)`nset(VCPKG_CRT_LINKAGE dynamic)`nset(VCPKG_LIBRARY_LINKAGE static)`n"
+      git pull 2> $null
+      bootstrap-vcpkg.bat
+      vcpkg install curl[sspi] expat freetype libjpeg-turbo libogg libpng `
+          libtheora libvorbis libvpx openssl opus pcre speex string-theory zlib `
+          --triplet x86-windows-static-dyncrt
+      vcpkg install python2 --triplet x86-windows
+
+      Set-Location C:\tools\vcpkg\installed\x86-windows-static-dyncrt
+      7z a $outpath\devlibs.zip debug\lib include lib misc share
+      Set-Location C:\tools\vcpkg\installed\x86-windows
+      7z a $outpath\devlibs.zip bin debug\bin debug\lib include lib share
 
 artifacts:
-  - path: prefix-*.zip
+  - path: devlibs.zip
