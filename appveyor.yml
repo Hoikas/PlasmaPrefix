@@ -12,8 +12,8 @@ build_script:
       git pull 2> $null
       bootstrap-vcpkg.bat
       vcpkg install curl[sspi] expat freetype libjpeg-turbo libogg libpng `
-          libtheora libvorbis libvpx openssl opus pcre speex string-theory zlib `
-          --triplet x86-windows-static-dyncrt
+          libtheora libvorbis libvpx openssl opus pcre speex string-theory `
+          zlib openal-soft --triplet x86-windows-static-dyncrt
       vcpkg install python2 --triplet x86-windows
 
       Set-Location C:\tools\vcpkg\installed\x86-windows-static-dyncrt
