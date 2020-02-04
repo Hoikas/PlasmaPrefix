@@ -19,6 +19,8 @@ build_script:
       vcpkg install python2 --triplet x86-windows
       if ($lastExitCode -ne 0) { throw "Failed to build dynamic libs" }
 
+      vcpkg list
+
       Set-Location C:\tools\vcpkg\installed\x86-windows-static-dyncrt
       7z a $outpath\devlibs.zip debug\lib include lib misc share
       if ($lastExitCode -ne 0) { throw "Failed to archive static libs" }
