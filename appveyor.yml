@@ -1,6 +1,6 @@
 version: '{build}'
 
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 build_script:
   - ps: |
@@ -14,18 +14,34 @@ build_script:
       if ($lastExitCode -ne 0) { throw "Failed to update vcpkg" }
       vcpkg install curl[sspi] expat freetype libjpeg-turbo libogg libpng `
           libtheora libvorbis libvpx openssl opus pcre speex string-theory `
-          zlib --triplet x86-windows-static-dyncrt
+          zlib openal-soft --triplet x86-windows-static-dyncrt
       if ($lastExitCode -ne 0) { throw "Failed to build static libs" }
       vcpkg install python2 --triplet x86-windows
       if ($lastExitCode -ne 0) { throw "Failed to build dynamic libs" }
 
       vcpkg list
 
+      # Merge debug output into root, where possible
+      Set-Location C:\tools\vcpkg\installed
+      $debugDirs = @(
+          "x86-windows-static-dyncrt\debug\lib",
+          "x86-windows\debug\bin",
+          "x86-windows\debug\lib"
+      )
+      ForEach ($dir in $debugDirs) {
+          $dest = $dir.replace("\debug\", "\")
+          Get-ChildItem $dir\*.* | ForEach-Object {
+              if (-not (Test-Path "$dest\$($_.Name)")) {
+                  Move-Item $_.FullName "$dest\$($_.Name)"
+              }
+          }
+      }
+
       Set-Location C:\tools\vcpkg\installed\x86-windows-static-dyncrt
       7z a $outpath\devlibs.zip debug\lib include lib misc share
       if ($lastExitCode -ne 0) { throw "Failed to archive static libs" }
       Set-Location C:\tools\vcpkg\installed\x86-windows
-      7z a $outpath\devlibs.zip bin debug\bin debug\lib include lib share
+      7z a $outpath\devlibs.zip debug\bin debug\lib bin include lib share
       if ($lastExitCode -ne 0) { throw "Failed to archive dynamic libs" }
 
 artifacts:
