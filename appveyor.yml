@@ -21,27 +21,20 @@ build_script:
 
       vcpkg list --x-full-desc
 
-      # Merge debug output into root, where possible
+      # Merge debug output into root, where required
       Set-Location C:\tools\vcpkg\installed
-      $debugDirs = @(
-          "x86-windows-static-dyncrt\debug\lib",
-          "x86-windows\debug\bin",
-          "x86-windows\debug\lib"
-      )
-      ForEach ($dir in $debugDirs) {
-          $dest = $dir.replace("\debug\", "\")
-          Get-ChildItem $dir\*.* | ForEach-Object {
-              if (-not (Test-Path "$dest\$($_.Name)")) {
-                  Move-Item $_.FullName "$dest\$($_.Name)"
-              }
-          }
-      }
+      Move-Item "x86-windows\debug\bin\python27_d.*" "x86-windows\bin\"
+      Move-Item "x86-windows\debug\lib\python27_d.*" "x86-windows\lib\"
+
+      # CURL's cmake modules are incompatible with Plasma, but CMake 3.17 tries
+      # to use them anyway...  So we just nuke 'em
+      Remove-Item "x86-windows-static-dyncrt\share\curl\CURL*.cmake"
 
       Set-Location C:\tools\vcpkg\installed\x86-windows-static-dyncrt
       7z a $outpath\devlibs.zip debug\lib include lib misc share
       if ($lastExitCode -ne 0) { throw "Failed to archive static libs" }
       Set-Location C:\tools\vcpkg\installed\x86-windows
-      7z a $outpath\devlibs.zip debug\bin debug\lib bin include lib share
+      7z a $outpath\devlibs.zip bin include lib share
       if ($lastExitCode -ne 0) { throw "Failed to archive dynamic libs" }
 
 artifacts:
