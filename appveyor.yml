@@ -19,7 +19,7 @@ build_script:
       vcpkg install python2 --triplet x86-windows
       if ($lastExitCode -ne 0) { throw "Failed to build dynamic libs" }
 
-      vcpkg list
+      vcpkg list --x-full-desc
 
       # Merge debug output into root, where possible
       Set-Location C:\tools\vcpkg\installed
