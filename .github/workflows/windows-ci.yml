@@ -1,0 +1,49 @@
+name: Windows-CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-2016
+    strategy:
+      matrix:
+        arch: [x86]
+    env:
+      artifact-name: devlibs-windows-${{ matrix.arch }}
+      triplet: ${{ matrix.arch }}-windows-static-md
+
+    steps:
+      - name: Bootstrap vcpkg
+        run: |
+          cd C:\vcpkg
+          git pull
+          ./bootstrap-vcpkg.bat
+      - name: Build Libraries
+        run: |
+          #vcpkg install curl[sspi] expat freetype libjpeg-turbo libogg libpng `
+          #  libtheora libvorbis libvpx openal-soft openssl opus pcre python2 python3 `
+          #  speex string-theory zlib --triplet ${{ env.triplet }}
+          vcpkg install python3 --triplet ${{ env.triplet }}
+      - name: Apply Hacks
+        run: |
+          cd C:\vcpkg\installed\${{ env.triplet }}
+          # Merge debug output into root, where required
+          foreach ($item in (Get-ChildItem "debug\lib")) {
+            if ((Test-Path "lib\$item") -Eq $False) {
+              Move-Item "debug\lib\$item" "lib\$item"
+            }
+          }
+          Remove-Item "debug" -Recurse
+          # CURL's cmake modules are incompatible with Plasma, but CMake 3.17 tries
+          # to use them anyway...  So we just nuke 'em
+          Remove-Item "share\curl\CURL*.cmake"
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.artifact-name }}
+          path: C:\vcpkg\installed\${{ env.triplet }}\**
+      - name: Upload Logs
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.artifact-name }}-logs
+          path: C:\vcpkg\buildtrees\**\*.log
