@@ -8,9 +8,9 @@ build_script:
 
       Set-Location C:\tools\vcpkg
       git pull 2> $null
-      git config user.email "nobody@nowhere.com"
-      git config user.name "Nobody"
-      git revert --no-edit 12c6dc5230785f93870a849712841b2ec707544f
+      git remote add hoikas https://github.com/Hoikas/vcpkg.git
+      git fetch hoikas
+      git checkout hoikas/openal-soft
       if ($lastExitCode -ne 0) { throw "Failed to back out openal-soft changes" }
       bootstrap-vcpkg.bat
       if ($lastExitCode -ne 0) { throw "Failed to update vcpkg" }
