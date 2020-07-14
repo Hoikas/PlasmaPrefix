@@ -7,35 +7,28 @@ build_script:
       $outpath = (Get-Location).Path
 
       Set-Location C:\tools\vcpkg
-      # Create our own custom triplet, for static-linking of libraries, but dynamic CRT linkage.
-      Set-Content -Path "triplets/x86-windows-static-dyncrt.cmake" -Value "set(VCPKG_TARGET_ARCHITECTURE x86)`nset(VCPKG_CRT_LINKAGE dynamic)`nset(VCPKG_LIBRARY_LINKAGE static)`n"
       git pull 2> $null
       bootstrap-vcpkg.bat
       if ($lastExitCode -ne 0) { throw "Failed to update vcpkg" }
       vcpkg install curl[sspi] expat freetype libjpeg-turbo libogg libpng `
-          libtheora libvorbis libvpx openssl opus pcre speex string-theory `
-          zlib openal-soft --triplet x86-windows-static-dyncrt
+          libtheora libvorbis libvpx openal-soft openssl opus pcre python2 python3 `
+          speex string-theory zlib --triplet x86-windows-static-md
       if ($lastExitCode -ne 0) { throw "Failed to build static libs" }
-      vcpkg install python2 --triplet x86-windows
-      if ($lastExitCode -ne 0) { throw "Failed to build dynamic libs" }
 
       vcpkg list --x-full-desc
 
       # Merge debug output into root, where required
       Set-Location C:\tools\vcpkg\installed
-      Move-Item "x86-windows\debug\bin\python27_d.*" "x86-windows\bin\"
-      Move-Item "x86-windows\debug\lib\python27_d.*" "x86-windows\lib\"
+      Move-Item "x86-windows-static-md\debug\lib\python27_d.*" "x86-windows-static-md\lib\"
+      Move-Item "x86-windows-static-md\debug\lib\python38_d.*" "x86-windows-static-md\lib\"
 
       # CURL's cmake modules are incompatible with Plasma, but CMake 3.17 tries
       # to use them anyway...  So we just nuke 'em
-      Remove-Item "x86-windows-static-dyncrt\share\curl\CURL*.cmake"
+      Remove-Item "x86-windows-static-md\share\curl\CURL*.cmake"
 
-      Set-Location C:\tools\vcpkg\installed\x86-windows-static-dyncrt
+      Set-Location C:\tools\vcpkg\installed\x86-windows-static-md
       7z a $outpath\devlibs.zip debug\lib include lib misc share
       if ($lastExitCode -ne 0) { throw "Failed to archive static libs" }
-      Set-Location C:\tools\vcpkg\installed\x86-windows
-      7z a $outpath\devlibs.zip bin include lib share
-      if ($lastExitCode -ne 0) { throw "Failed to archive dynamic libs" }
 
 artifacts:
   - path: devlibs.zip
