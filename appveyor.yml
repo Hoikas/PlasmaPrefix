@@ -17,13 +17,9 @@ build_script:
 
       vcpkg list --x-full-desc
 
-      # Merge debug output into root, where required
-      Set-Location C:\tools\vcpkg\installed
-      Move-Item "x86-windows-static-md\debug\lib\python27_d.*" "x86-windows-static-md\lib\"
-      Move-Item "x86-windows-static-md\debug\lib\python38_d.*" "x86-windows-static-md\lib\"
-
       # CURL's cmake modules are incompatible with Plasma, but CMake 3.17 tries
       # to use them anyway...  So we just nuke 'em
+      Set-Location C:\tools\vcpkg\installed
       Remove-Item "x86-windows-static-md\share\curl\CURL*.cmake"
 
       Set-Location C:\tools\vcpkg\installed\x86-windows-static-md
