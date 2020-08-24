@@ -14,7 +14,7 @@ build_script:
       git pull 2> $null
       bootstrap-vcpkg.bat
       if ($lastExitCode -ne 0) { throw "Failed to update vcpkg" }
-      vcpkg install zlib --triplet x86-windows-static-md
+      vcpkg install zlib
       if ($lastExitCode -ne 0) { throw "Failed to build static libs" }
 
       vcpkg list --x-full-desc
