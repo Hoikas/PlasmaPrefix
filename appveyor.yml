@@ -14,9 +14,7 @@ build_script:
       git pull 2> $null
       bootstrap-vcpkg.bat
       if ($lastExitCode -ne 0) { throw "Failed to update vcpkg" }
-      vcpkg install curl[sspi] expat freetype libjpeg-turbo libogg libpng `
-          libvorbis libvpx openal-soft openssl opus pcre python2 python3 `
-          speex string-theory zlib --triplet x86-windows-static-md
+      vcpkg install zlib --triplet x86-windows-static-md
       if ($lastExitCode -ne 0) { throw "Failed to build static libs" }
 
       vcpkg list --x-full-desc
