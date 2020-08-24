@@ -2,6 +2,10 @@ version: '{build}'
 
 image: Visual Studio 2017
 
+init:
+  - ps: |
+      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 build_script:
   - ps: |
       $outpath = (Get-Location).Path
@@ -25,6 +29,11 @@ build_script:
       Set-Location C:\tools\vcpkg\installed\x86-windows-static-md
       7z a $outpath\devlibs.zip debug\lib include lib misc share
       if ($lastExitCode -ne 0) { throw "Failed to archive static libs" }
+on_finish:
+  - ps: |
+      $blockRdp = $true;
+      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 
 artifacts:
   - path: devlibs.zip
