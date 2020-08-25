@@ -19,19 +19,10 @@ build_script:
       Add-Content -Path "C:\tools\vcpkg\triplets\x86-windows-port-debug.cmake" -Value "set(PORT_DEBUG ON)"
       Write-Host (Get-Content -Path "C:\tools\vcpkg\triplets\x86-windows-port-debug.cmake")
 
-      vcpkg install zlib --triplet x86-windows-port-debug
-      if ($lastExitCode -ne 0) { throw "Failed to build static libs" }
+      vcpkg install bzip2 --triplet x86-windows-port-debug
+      Write-Host "Writing out package directory contents..."
+      ls -r C:\tools\vcpkg\packages\bzip2_x86-windows-port-debug
 
-      vcpkg list --x-full-desc
-
-      # CURL's cmake modules are incompatible with Plasma, but CMake 3.17 tries
-      # to use them anyway...  So we just nuke 'em
-      Set-Location C:\tools\vcpkg\installed
-      Remove-Item "x86-windows-static-md\share\curl\CURL*.cmake"
-
-      Set-Location C:\tools\vcpkg\installed\x86-windows-static-md
-      7z a $outpath\devlibs.zip debug\lib include lib misc share
-      if ($lastExitCode -ne 0) { throw "Failed to archive static libs" }
 on_finish:
   - ps: |
       $blockRdp = $true;
