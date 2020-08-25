@@ -2,26 +2,19 @@ version: '{build}'
 
 image: Visual Studio 2017
 
-init:
-  - ps: |
-      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 build_script:
   - ps: |
       $outpath = (Get-Location).Path
 
-      Set-Location C:\tools\vcpkg
-      git pull 2> $null
+      Set-Location C:\Tools\vcpkg
+      git fetch origin pull/12877/head:test  2> $null
+      git checkout test 2> $null
       bootstrap-vcpkg.bat
       if ($lastExitCode -ne 0) { throw "Failed to update vcpkg" }
 
-      Set-Content "C:\tools\vcpkg\triplets\x86-windows-port-debug.cmake" -Value (Get-Content -Path "C:\tools\vcpkg\triplets\x86-windows.cmake")
-      Add-Content -Path "C:\tools\vcpkg\triplets\x86-windows-port-debug.cmake" -Value "set(PORT_DEBUG ON)"
-      Write-Host (Get-Content -Path "C:\tools\vcpkg\triplets\x86-windows-port-debug.cmake")
-
-      vcpkg install brotli --triplet x86-windows-port-debug
+      vcpkg install zlib --cmake-args="--trace-expand -DPORT_DEBUG=ON"
       Write-Host "Writing out package directory contents..."
-      ls -r C:\tools\vcpkg\packages\bzip2_x86-windows-port-debug
+      ls -r C:\tools\vcpkg\packages\zlib_x86-windows-port-debug
 
 on_finish:
   - ps: |
