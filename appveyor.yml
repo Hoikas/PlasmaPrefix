@@ -6,7 +6,7 @@ build_script:
   - ps: |
       $outpath = (Get-Location).Path
 
-      Set-Location C:\tools\vcpkg
+      Set-Location C:\Tools\vcpkg
       git pull 2> $null
       bootstrap-vcpkg.bat
       if ($lastExitCode -ne 0) { throw "Failed to update vcpkg" }
